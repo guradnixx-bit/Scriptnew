@@ -1,49 +1,54 @@
--- Pastikan Library terikat dengan benar
-local OrionLib = loadstring(game:HttpGet(('https://raw.githubusercontent.com/shlexware/Orion/main/source')))()
+local Rayfield = loadstring(game:HttpGet('https://sirius.menu/rayfield'))()
 
--- Membuat Window (Utama)
-local Window = OrionLib:MakeWindow({
-    Name = "Delta Script Baru", 
-    HidePremium = false, 
-    SaveConfig = true, 
-    ConfigFolder = "OrionTest",
-    IntroText = "Memuat Script..."
+local Window = Rayfield:CreateWindow({
+   Name = "Delta Script v2",
+   LoadingTitle = "Memuat Hub...",
+   LoadingSubtitle = "by Guradnixx",
+   ConfigurationSaving = {
+      Enabled = true,
+      FolderName = "DeltaConfigs",
+      FileName = "MyScript"
+   }
 })
 
--- Menambahkan Tab
-local MainTab = Window:MakeTab({
-	Name = "Fitur Utama",
-	Icon = "rbxassetid://4483345998",
-	PremiumOnly = false
+local MainTab = Window:CreateTab("Utama", 4483362458) -- Ikon Home
+
+MainTab:CreateSection("Fitur Player")
+
+MainTab:CreateSlider({
+   Name = "WalkSpeed (Lari)",
+   Range = {16, 300},
+   Increment = 1,
+   Suffix = "Speed",
+   CurrentValue = 16,
+   Flag = "Slider1",
+   Callback = function(Value)
+      game.Players.LocalPlayer.Character.Humanoid.WalkSpeed = Value
+   end,
 })
 
--- Fitur Speed (Sangat umum dicoba pertama kali)
-MainTab:AddSlider({
-	Name = "Kecepatan Jalan",
-	Min = 16,
-	Max = 300,
-	Default = 16,
-	Color = Color3.fromRGB(255,255,255),
-	Increment = 1,
-	ValueName = "Speed",
-	Callback = function(Value)
-		game.Players.LocalPlayer.Character.Humanoid.WalkSpeed = Value
-	end    
+MainTab:CreateSlider({
+   Name = "JumpPower (Lompat)",
+   Range = {50, 300},
+   Increment = 1,
+   Suffix = "Power",
+   CurrentValue = 50,
+   Flag = "Slider2",
+   Callback = function(Value)
+      game.Players.LocalPlayer.Character.Humanoid.JumpPower = Value
+   end,
 })
 
--- Fitur Jump
-MainTab:AddSlider({
-	Name = "Tinggi Lompatan",
-	Min = 50,
-	Max = 300,
-	Default = 50,
-	Color = Color3.fromRGB(255,255,255),
-	Increment = 1,
-	ValueName = "Power",
-	Callback = function(Value)
-		game.Players.LocalPlayer.Character.Humanoid.JumpPower = Value
-	end    
+MainTab:CreateButton({
+   Name = "Hapus GUI",
+   Callback = function()
+      Rayfield:Destroy()
+   end,
 })
 
--- WAJIB: Init untuk memunculkan GUI
-OrionLib:Init()
+Rayfield:Notify({
+   Title = "Berhasil!",
+   Content = "Script telah dimuat dengan sukses",
+   Duration = 5,
+   Image = 4483362458,
+})
