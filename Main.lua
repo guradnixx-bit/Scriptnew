@@ -1,34 +1,45 @@
---// NOTIFIKASI PEMUATAN
+--// ELANG HUB v36.8.5 | PANDA AUTH INTEGRATION
+--// NOTIFIKASI AWAL
 game:GetService("StarterGui"):SetCore("SendNotification", {
-    Title = "Elang Hub System",
-    Text = "Checking Key... Please wait",
+    Title = "Elang Hub",
+    Text = "Memeriksa Lisensi... Mohon Tunggu",
     Duration = 5
 })
 
---// PANDA AUTH SYSTEM (DENGAN PERBAIKAN KONEKSI)
+--// LOADER PANDA AUTH (ANTI NIL)
 local PandaAuth
-local success, err = pcall(function()
+local success, result = pcall(function()
     return loadstring(game:HttpGet("https://api.pandadevelopment.net/v1/sdk/load"))()
 end)
 
-if success and err then
-    PandaAuth = err
+if success and result then
+    PandaAuth = result
 else
-    warn("Gagal memuat API Panda: " .. tostring(err))
-    return
+    -- Percobaan kedua jika HTTPS gagal (Sering terjadi di Executor HP)
+    local success2, result2 = pcall(function()
+        return loadstring(game:HttpGet("http://api.pandadevelopment.net/v1/sdk/load"))()
+    end)
+    if success2 and result2 then
+        PandaAuth = result2
+    else
+        warn("Gagal terhubung ke Server Panda Auth!")
+        return
+    end
 end
 
+--// CONFIG PANDA
 local ServiceID = "hitboxbby" 
 local ServerKey = "1e16d344-86cc-4353-87c7-e025022d77be" 
 
+--// SCRIPT UTAMA ELANG HUB (Fungsi ini dipanggil jika key valid)
 local function StartScript()
-    --// SCRIPT UTAMA ELANG HUB KAMU
     local Players = game:GetService("Players")
     local UIS = game:GetService("UserInputService")
     local RunService = game:GetService("RunService")
     local Workspace = game:GetService("Workspace")
     local Player = Players.LocalPlayer
 
+    --// CONFIG HUB
     local CONFIG = {
         HitboxEnabled = false,
         SmartNoclip = false,
@@ -49,6 +60,7 @@ local function StartScript()
     local Hitboxes = {}
     local lastScan = 0
 
+    --// UTILITIES
     local function isOtherPlayer(obj)
         for _, p in ipairs(Players:GetPlayers()) do
             if p ~= Player and p.Character and obj:IsDescendantOf(p.Character) then return true end
@@ -90,6 +102,7 @@ local function StartScript()
         end)
     end
 
+    --// GUI SYSTEM
     local gui = Instance.new("ScreenGui", Player:WaitForChild("PlayerGui"))
     gui.Name = "ElangHub_V36_8_5"; gui.ResetOnSpawn = false
 
@@ -233,21 +246,25 @@ local function StartScript()
     end)
 end
 
---// CEK VALIDASI
-local player = game:GetService("Players").LocalPlayer
-local status = PandaAuth:Validate(ServerKey, player.UserId, ServiceID)
+--// PROSES PENGECEKAN KEY (CEK NIL)
+if PandaAuth and PandaAuth.Validate then
+    local player = game:GetService("Players").LocalPlayer
+    local status = PandaAuth:Validate(ServerKey, player.UserId, ServiceID)
 
-if status == "Validated" then
-    print("Elang Hub: Key Valid!")
-    StartScript()
+    if status == "Validated" then
+        print("Elang Hub: Key Valid!")
+        StartScript()
+    else
+        local keyLink = "https://new.pandadevelopment.net/getkey?service=" .. ServiceID
+        if setclipboard then setclipboard(keyLink) end
+        
+        game:GetService("StarterGui"):SetCore("SendNotification", {
+            Title = "LISENSI DIBUTUHKAN",
+            Text = "Link Key sudah di-copy! Paste di Chrome.",
+            Duration = 10
+        })
+        warn("Ambil key di: " .. keyLink)
+    end
 else
-    local keyLink = "https://new.pandadevelopment.net/getkey?service=" .. ServiceID
-    if setclipboard then setclipboard(keyLink) end
-    
-    game:GetService("StarterGui"):SetCore("SendNotification", {
-        Title = "KEY REQUIRED",
-        Text = "Link copied! Paste in Browser.",
-        Duration = 10
-    })
-    warn("Get key at: " .. keyLink)
+    warn("Panda Auth is NIL - Terjadi kesalahan saat memuat API!")
 end
