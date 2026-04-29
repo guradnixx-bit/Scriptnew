@@ -1,17 +1,34 @@
---// PANDA AUTH SYSTEM (PINTU MASUK)
-local PandaAuth = loadstring(game:HttpGet("https://api.pandadevelopment.net/v1/sdk/load"))()
+--// NOTIFIKASI PEMUATAN
+game:GetService("StarterGui"):SetCore("SendNotification", {
+    Title = "Elang Hub System",
+    Text = "Checking Key... Please wait",
+    Duration = 5
+})
+
+--// PANDA AUTH SYSTEM (DENGAN PERBAIKAN KONEKSI)
+local PandaAuth
+local success, err = pcall(function()
+    return loadstring(game:HttpGet("https://api.pandadevelopment.net/v1/sdk/load"))()
+end)
+
+if success and err then
+    PandaAuth = err
+else
+    warn("Gagal memuat API Panda: " .. tostring(err))
+    return
+end
+
 local ServiceID = "hitboxbby" 
-local ServerKey = "1e16d344-86cc-4353-87c7-e025022d77be" -- Ganti dengan API Key dari dashboard Panda
+local ServerKey = "1e16d344-86cc-4353-87c7-e025022d77be" 
 
 local function StartScript()
-    --// ELANG HUB v36.8.5 | EASY COLOR PRESETS
+    --// SCRIPT UTAMA ELANG HUB KAMU
     local Players = game:GetService("Players")
     local UIS = game:GetService("UserInputService")
     local RunService = game:GetService("RunService")
     local Workspace = game:GetService("Workspace")
     local Player = Players.LocalPlayer
 
-    --// CONFIG
     local CONFIG = {
         HitboxEnabled = false,
         SmartNoclip = false,
@@ -32,7 +49,6 @@ local function StartScript()
     local Hitboxes = {}
     local lastScan = 0
 
-    --// UTILITIES
     local function isOtherPlayer(obj)
         for _, p in ipairs(Players:GetPlayers()) do
             if p ~= Player and p.Character and obj:IsDescendantOf(p.Character) then return true end
@@ -74,7 +90,6 @@ local function StartScript()
         end)
     end
 
-    --// GUI SYSTEM
     local gui = Instance.new("ScreenGui", Player:WaitForChild("PlayerGui"))
     gui.Name = "ElangHub_V36_8_5"; gui.ResetOnSpawn = false
 
@@ -94,7 +109,6 @@ local function StartScript()
     taskIcon.MouseButton1Click:Connect(function() main.Visible = true; taskbar.Visible = false end)
     closeBtn.MouseButton1Click:Connect(function() gui:Destroy() end)
 
-    --// TABS
     local body = Instance.new("Frame", main); body.Size = UDim2.new(1,0,1,-40); body.Position = UDim2.new(0,0,0,40); body.BackgroundTransparency = 1
     local sidebar = Instance.new("Frame", body); sidebar.Size = UDim2.new(0,130,1,0); sidebar.BackgroundColor3 = Color3.new(0,0,0); sidebar.BackgroundTransparency = 0.6
     local nav = Instance.new("ScrollingFrame", sidebar); nav.Size = UDim2.new(1,0,1,0); nav.BackgroundTransparency = 1; nav.ScrollBarThickness = 0
@@ -164,7 +178,6 @@ local function StartScript()
     addXYZ(normP, SETTINGS.Normal); addXYZ(mainP, SETTINGS.Main); addXYZ(ballP, SETTINGS.Ball); addXYZ(cylP, SETTINGS.Cyl); addXYZ(robuxP, SETTINGS.Robux)
     addXYZ(groupP, SETTINGS.Group)
 
-    --// ENGINE
     RunService.Stepped:Connect(function()
         local char = Player.Character
         if not char then return end
@@ -220,32 +233,21 @@ local function StartScript()
     end)
 end
 
---// PROSES PENGECEKAN KEY (PANDA AUTH)
-local player = game.Players.LocalPlayer
+--// CEK VALIDASI
+local player = game:GetService("Players").LocalPlayer
 local status = PandaAuth:Validate(ServerKey, player.UserId, ServiceID)
 
 if status == "Validated" then
-    print("Elang Hub: Key Valid! Memuat Script...")
+    print("Elang Hub: Key Valid!")
     StartScript()
 else
     local keyLink = "https://new.pandadevelopment.net/getkey?service=" .. ServiceID
+    if setclipboard then setclipboard(keyLink) end
     
-    -- Notifikasi Console
-    warn("------------------------------------------")
-    warn("ELANG HUB: KAMU BELUM PUNYA KEY!")
-    warn("LINK SUDAH DI-COPY KE CLIPBOARD.")
-    warn("Tempel link di browser HP kamu: " .. keyLink)
-    warn("------------------------------------------")
-
-    -- Copy otomatis ke clipboard HP (Khusus Executor Delta/Fluxus/Vega)
-    if setclipboard then
-        setclipboard(keyLink)
-    end
-    
-    -- Pesan singkat di layar
     game:GetService("StarterGui"):SetCore("SendNotification", {
-        Title = "ELANG HUB KEY",
-        Text = "Link key sudah di-copy! Cek Console.",
+        Title = "KEY REQUIRED",
+        Text = "Link copied! Paste in Browser.",
         Duration = 10
     })
+    warn("Get key at: " .. keyLink)
 end
